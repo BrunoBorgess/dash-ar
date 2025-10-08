@@ -48,6 +48,26 @@ const Dashboard = () => {
   const lucro = receitaTotal - custoTotal;
   const custoPorKg = custoTotal / 4000; // Assumindo 4kg por animal em média
 
+  // Validação de limites
+  const validateValue = (value: number, min: number, max: number, label: string) => {
+    if (value < min || value > max) {
+      toast.error(`${label} deve estar entre ${min} e ${max}.`);
+      return false;
+    }
+    return true;
+  };
+
+  // Função para atualizar valores com validação
+  const updateValue = (setter: React.Dispatch<React.SetStateAction<number>>, value: number, min: number, max: number, label: string) => {
+    if (validateValue(value, min, max, label)) {
+      setIsLoading(true);
+      setTimeout(() => {
+        setter(value);
+        setIsLoading(false);
+      }, 300);
+    }
+  };
+
   // KPIs atualizados
   const kpis = [
     { title: 'Custo Total', value: `R$ ${custoTotal.toLocaleString('pt-BR')}`, color: 'bg-red-500' },
@@ -58,18 +78,18 @@ const Dashboard = () => {
 
   // Dados simulados para o gráfico de linha (12 meses de 2025)
   const monthlyData = [
-    { month: 'Jan', date: '2025-01-01', lucro: lucro * 0.8 },
-    { month: 'Fev', date: '2025-02-01', lucro: lucro * 0.85 },
-    { month: 'Mar', date: '2025-03-01', lucro: lucro * 0.9 },
-    { month: 'Abr', date: '2025-04-01', lucro: lucro },
-    { month: 'Mai', date: '2025-05-01', lucro: lucro * 1.1 },
-    { month: 'Jun', date: '2025-06-01', lucro: lucro * 1.15 },
-    { month: 'Jul', date: '2025-07-01', lucro: lucro * 1.2 },
-    { month: 'Ago', date: '2025-08-01', lucro: lucro * 1.25 },
-    { month: 'Set', date: '2025-09-01', lucro: lucro * 1.3 },
-    { month: 'Out', date: '2025-10-01', lucro: lucro * 1.35 },
-    { month: 'Nov', date: '2025-11-01', lucro: lucro * 1.4 },
-    { month: 'Dez', date: '2025-12-01', lucro: lucro * 1.45 },
+    { month: 'Jan', date: '2025-01-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 0.8 },
+    { month: 'Fev', date: '2025-02-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 0.85 },
+    { month: 'Mar', date: '2025-03-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 0.9 },
+    { month: 'Abr', date: '2025-04-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) },
+    { month: 'Mai', date: '2025-05-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 1.1 },
+    { month: 'Jun', date: '2025-06-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 1.15 },
+    { month: 'Jul', date: '2025-07-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 1.2 },
+    { month: 'Ago', date: '2025-08-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 1.25 },
+    { month: 'Set', date: '2025-09-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 1.3 },
+    { month: 'Out', date: '2025-10-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 1.35 },
+    { month: 'Nov', date: '2025-11-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 1.4 },
+    { month: 'Dez', date: '2025-12-01', lucro: (receitaTotal - (custoVariavel + custoFixo)) * 1.45 },
   ];
 
   // Filtrar dados com base nos meses selecionados
@@ -350,7 +370,7 @@ const Dashboard = () => {
                   min={control.min}
                   max={control.max}
                   value={control.value}
-                  onChange={(e) => { setIsLoading(true); setTimeout(() => { control.setValue(Number(e.target.value)); setIsLoading(false); }, 300); }}
+                  onChange={(e) => updateValue(control.setValue, Number(e.target.value), control.min, control.max, control.label)}
                   className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer transition-all duration-300 group-hover:ring-2 group-hover:ring-blue-500"
                 />
                 <span className="text-sm opacity-75">{control.unit}{control.format ? control.format(control.value) : control.value}</span>
